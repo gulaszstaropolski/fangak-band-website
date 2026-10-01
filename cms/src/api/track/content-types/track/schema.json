@@ -1,0 +1,62 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tracks",
+  "info": {
+    "singularName": "track",
+    "pluralName": "tracks",
+    "displayName": "Track"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "description": {
+      "type": "text"
+    },
+    "artwork": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "bandcampUrl": {
+      "type": "string"
+    },
+    "bandcampEmbedUrl": {
+      "type": "string"
+    },
+    "soundcloudUrl": {
+      "type": "string"
+    },
+    "soundcloudEmbedUrl": {
+      "type": "string"
+    },
+    "spotifyUrl": {
+      "type": "string"
+    },
+    "spotifyEmbedUrl": {
+      "type": "string"
+    },
+    "streamingLinks": {
+      "type": "json"
+    },
+    "releases": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::release.release",
+      "mappedBy": "tracks"
+    }
+  }
+}

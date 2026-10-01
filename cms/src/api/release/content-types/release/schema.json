@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "releases",
+  "info": {
+    "singularName": "release",
+    "pluralName": "releases",
+    "displayName": "Release"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "releaseDate": {
+      "type": "date"
+    },
+    "artwork": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "bandcampUrl": {
+      "type": "string"
+    },
+    "spotifyUrl": {
+      "type": "string"
+    },
+    "streamingLinks": {
+      "type": "json"
+    },
+    "tracks": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::track.track",
+      "inversedBy": "releases"
+    }
+  }
+}
