@@ -1,3 +1,6 @@
+import type { ContactFormField } from "@/lib/contact-fields";
+export type { ContactFormField } from "@/lib/contact-fields";
+
 export type StreamingLink = {
   platform: string;
   url: string;
@@ -8,8 +11,46 @@ export type Band = {
   tagline?: string;
   bio?: string;
   heroImage?: string;
+  logoImage?: string;
+  logoText?: string;
+  backgroundImage?: string;
   socialLinks?: StreamingLink[];
   streamingLinks?: StreamingLink[];
+};
+
+export type Music = {
+  id: number;
+  title: string;
+  description?: string;
+  bandcampUrl?: string;
+  soundcloudUrl?: string;
+};
+
+export type Stream = {
+  id: number;
+  title: string;
+  description?: string;
+  platformName: string;
+  platformUrl: string;
+};
+
+export type Video = {
+  id: number;
+  title: string;
+  description?: string;
+  youtubeUrl: string;
+  youtubeEmbedCode?: string;
+};
+
+export type Contact = {
+  email?: string;
+  description?: string;
+  formFields?: ContactFormField[];
+};
+
+export type About = {
+  description?: string;
+  historyText?: string;
 };
 
 export type Track = {
@@ -113,10 +154,46 @@ export async function getBand(): Promise<Band> {
     return {
       ...band,
       heroImage: imageUrl((band as Band & { heroImage?: unknown }).heroImage),
+      logoImage: imageUrl((band as Band & { logoImage?: unknown }).logoImage),
+      backgroundImage: imageUrl((band as Band & { backgroundImage?: unknown }).backgroundImage),
     };
   } catch {
     return { name: "FANGAK", tagline: "Independent music, made to move you." };
   }
+}
+
+export async function getMusic(): Promise<Music[]> {
+  return collection<Music>("musics", "sort=createdAt:desc");
+}
+
+export async function getStreams(): Promise<Stream[]> {
+  return collection<Stream>("streams", "sort=createdAt:asc");
+}
+
+export async function getVideos(): Promise<Video[]> {
+  return collection<Video>("videos", "sort=createdAt:desc");
+}
+
+async function single<T>(type: string): Promise<T | undefined> {
+  if (!cmsUrl) return undefined;
+  try {
+    const response = await fetch(`${cmsUrl}/api/${type}?populate=*`, {
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) return undefined;
+    const json = (await response.json()) as { data?: unknown };
+    return json.data ? normalize<T>(json.data) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function getContact(): Promise<Contact | undefined> {
+  return single<Contact>("contact");
+}
+
+export async function getAbout(): Promise<About | undefined> {
+  return single<About>("about");
 }
 
 export async function getTracks(): Promise<Track[]> {
@@ -160,3 +237,5 @@ export async function getTeam(): Promise<TeamMember[]> {
     photo: imageUrl((member as TeamMember & { photo?: unknown }).photo),
   }));
 }
+import type { ContactFormField } from "@/lib/contact-fields";
+export type { ContactFormField } from "@/lib/contact-fields";

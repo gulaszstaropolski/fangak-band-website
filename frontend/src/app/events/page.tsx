@@ -10,7 +10,7 @@ export default async function EventsPage() {
   const [band, upcoming] = await Promise.all([getBand(), getUpcomingEvents()]);
   return (
     <>
-      <SiteHeader name={band.name || "FANGAK"} />
+      <SiteHeader name={band.name || "FANGAK"} logoText={band.logoText} logoImage={band.logoImage} />
       <main className="inner-page">
         <PageIntro eyebrow="See you out there" title="On the road." copy="Find us at a venue near you. New dates are added as they’re announced." />
         {upcoming.length ? <div className="events-list">{upcoming.map((event) => <article className="event-row" key={event.id}>

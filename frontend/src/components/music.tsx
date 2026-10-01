@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { StreamingLink, Track } from "@/lib/content";
+import type { Music, StreamingLink, Track } from "@/lib/content";
 
 const knownPlatforms = [
   "Bandcamp",
@@ -70,6 +70,22 @@ export function StreamingLinks({ links = [] }: { links?: StreamingLink[] }) {
           </a>
         ))}
     </div>
+  );
+}
+
+export function MusicCard({ music }: { music: Music }) {
+  const bandcampUrl = safeExternalUrl(music.bandcampUrl);
+  const soundcloudUrl = safeExternalUrl(music.soundcloudUrl);
+  return (
+    <article className="music-entry">
+      <p className="eyebrow">Music</p>
+      <h2>{music.title}</h2>
+      {music.description && <p>{music.description}</p>}
+      <div className="track-platforms">
+        {bandcampUrl && <a href={bandcampUrl} target="_blank" rel="noreferrer">Bandcamp ↗</a>}
+        {soundcloudUrl && <a href={soundcloudUrl} target="_blank" rel="noreferrer">SoundCloud ↗</a>}
+      </div>
+    </article>
   );
 }
 

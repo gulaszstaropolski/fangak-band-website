@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { defaultContactFields, type ContactFormField } from "@/lib/contact-fields";
+import { getContact } from "@/lib/content";
 
 export const runtime = "nodejs";
 
@@ -38,24 +40,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Thanks for getting in touch." });
   }
 
-  const name = typeof fields.name === "string" ? fields.name.trim() : "";
-  const email = typeof fields.email === "string" ? fields.email.trim() : "";
-  const message = typeof fields.message === "string" ? fields.message.trim() : "";
-  if (
-    !name ||
-    name.length > 100 ||
-    /[\u0000-\u001f\u007f]/.test(name) ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-    email.length > 254 ||
-    message.length < 10 ||
-    message.length > 5000
-  ) {
-    return NextResponse.json({ message: "Please check your details and try again." }, { status: 400 });
+  const contact = await getContact();
+  const configuredFields = (contact?.formFields ?? []).filter((field) =>
+    /^[a-z][a-z0-9_-]{0,49}$/.test(field.name) &&
+    field.label &&
+    ["text", "email", "tel", "textarea"].includes(field.type),
+  );
+  const formFields = configuredFields.length ? configuredFields : defaultContactFields;
+  const values: { field: ContactFormField; value: string }[] = [];
+  for (const field of formFields) {
+    const rawValue = fields[field.name];
+    const value = typeof rawValue === "string" ? rawValue.trim() : "";
+    const maxLength = Math.min(5000, Math.max(1, field.maxLength ?? 500));
+    if (
+      ((field.required ?? false) && !value) ||
+      value.length > maxLength ||
+      (field.name === "name" && /[\u0000-\u001f\u007f]/.test(value)) ||
+      (field.name === "message" && value.length < 10) ||
+      (field.type === "email" && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+    ) {
+      return NextResponse.json({ message: "Please check your details and try again." }, { status: 400 });
+    }
+    values.push({ field, value });
   }
+  const name = values.find(({ field }) => field.name === "name")?.value || "Website contact";
+  const email = values.find(({ field }) => field.type === "email")?.value;
+  const message = values.find(({ field }) => field.name === "message")?.value;
 
   const host = process.env.SMTP_HOST;
   const from = process.env.SMTP_FROM;
-  const to = process.env.CONTACT_TO;
+  const to = contact?.email?.trim() || process.env.CONTACT_TO;
   const port = Number(process.env.SMTP_PORT || 587);
   if (!host || !from || !to || !Number.isInteger(port) || port < 1 || port > 65535) {
     return NextResponse.json({ message: "Contact form email is not configured yet. Please try again later." }, { status: 503 });
@@ -75,9 +89,9 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from,
       to,
-      replyTo: email,
-      subject: `Website enquiry from ${name}`,
-      text: `From: ${name} <${email}>\n\n${message}`,
+      ...(email ? { replyTo: email } : {}),
+      subject: `Website enquiry from ${name.replace(/[\r\n]/g, " ")}`,
+      text: values.map(({ field, value }) => `${field.label}: ${value}`).join("\n\n") || message,
     });
     return NextResponse.json({ message: "Thanks — your message has been sent." });
   } catch {

@@ -21,6 +21,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .site-header { height: 82px; display: flex; align-items: center; justify-content: space-between; padding: 0 6.25%; background: var(--paper); position: relative; z-index: 4; }
 .wordmark { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.09em; }
+.logo-image { width: auto; height: 42px; object-fit: contain; }
 .wordmark-dot { color: var(--orange); }
 .main-nav { display: flex; align-items: center; gap: clamp(1rem, 2.8vw, 2.8rem); font-size: .79rem; font-weight: 600; }
 .main-nav a { transition: color .2s ease; }
@@ -110,6 +111,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .team-card h3, .release-card h3 { margin: -.7rem 0 .4rem; font-size: 1.5rem; letter-spacing: -.05em; }
 .team-card > p:last-child { color: var(--muted); font-size: .85rem; line-height: 1.7; }
 .music-list { padding: 0 12.5% 6rem; }
+.music-entry { padding: 2rem 0; border-top: 1px solid var(--line); }
+.music-entry h2 { margin: 0 0 .9rem; font-size: clamp(2rem, 4vw, 3.6rem); line-height: .98; letter-spacing: -.08em; }
+.music-entry > p:not(.eyebrow), .video-card > div > p { color: var(--muted); font-size: .9rem; line-height: 1.7; }
 .music-list .track-card { padding: 2rem 0; border-top: 1px solid var(--line); }
 .music-list .track-card:last-child { border-bottom: 1px solid var(--line); }
 .music-list .track-artwork { max-width: 350px; }
@@ -124,6 +128,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .release-art > span { font-size: 12rem; font-weight: 700; letter-spacing: -.15em; }
 .release-card .eyebrow { margin-bottom: 1rem; }
 .release-card .track-platforms { margin-bottom: 1rem; }
+.video-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; padding: 0 12.5% 8rem; }
+.video-card { display: grid; align-content: start; gap: 1rem; }
+.video-embed { width: 100%; aspect-ratio: 16 / 9; border: 0; background: var(--cream); }
+.video-card h2 { margin: 0; font-size: 1.5rem; letter-spacing: -.05em; }
+.video-card > div > p { margin: .5rem 0 0; }
+.video-fallback { display: grid; min-height: 220px; place-items: center; padding: 2rem; background: var(--cream); font-weight: 700; }
 .music-platform-section { margin-top: 2rem; }
 .gallery-grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 9vw; gap: 1rem; padding: 0 6.25% 8rem; }
 .gallery-tile { position: relative; grid-column: span 2; grid-row: span 2; min-height: 180px; margin: 0; overflow: hidden; background: var(--cream); }
@@ -193,6 +203,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .about-art { aspect-ratio: 1.1; }
   .team-grid, .release-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
   .music-list { padding: 0 7% 5rem; }
+  .video-grid { grid-template-columns: 1fr; padding: 0 7% 5rem; }
   .music-list .track-card { padding: 1.5rem 0; }
   .music-list .track-artwork { max-width: none; }
   .music-list .track-artwork > span { font-size: 55vw; }

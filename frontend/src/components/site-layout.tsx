@@ -1,18 +1,20 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const navigation = [
   ["About", "/about"],
   ["Music", "/music"],
+  ["Videos", "/videos"],
   ["Gallery", "/gallery"],
   ["Tour", "/events"],
   ["Contact", "/contact"],
 ] as const;
 
-export function SiteHeader({ name }: { name: string }) {
+export function SiteHeader({ name, logoText, logoImage }: { name: string; logoText?: string; logoImage?: string }) {
   return (
     <header className="site-header">
       <Link className="wordmark" href="/" aria-label={`${name} home`}>
-        {name}
+        {logoImage ? <Image src={logoImage} alt={logoText || name} width={160} height={56} className="logo-image" /> : logoText || name}
         <span className="wordmark-dot">.</span>
       </Link>
       <nav className="main-nav" aria-label="Main navigation">

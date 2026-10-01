@@ -26,6 +26,20 @@
       "multiple": false,
       "allowedTypes": ["images"]
     },
+    "logoImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "logoText": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "backgroundImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
     "socialLinks": {
       "type": "json"
     },

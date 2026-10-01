@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getBand } from "@/lib/content";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,10 +18,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const band = await getBand();
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body style={band.backgroundImage ? { backgroundImage: `url(${JSON.stringify(band.backgroundImage)})`, backgroundSize: "cover", backgroundAttachment: "fixed", backgroundPosition: "center" } : undefined}>{children}</body>
     </html>
   );
 }

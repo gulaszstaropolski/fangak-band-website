@@ -1,21 +1,22 @@
 import Image from "next/image";
-import { safeExternalUrl, StreamingLinks, TrackCard } from "@/components/music";
+import { MusicCard, safeExternalUrl, StreamingLinks, TrackCard } from "@/components/music";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
-import { getBand, getReleases, getTracks } from "@/lib/content";
+import { getBand, getMusic, getReleases, getTracks } from "@/lib/content";
 
 export const metadata = { title: "Music" };
 export const revalidate = 60;
 
 export default async function MusicPage() {
-  const [band, tracks, releases] = await Promise.all([getBand(), getTracks(), getReleases()]);
+  const [band, music, tracks, releases] = await Promise.all([getBand(), getMusic(), getTracks(), getReleases()]);
   return (
     <>
-      <SiteHeader name={band.name || "FANGAK"} />
+      <SiteHeader name={band.name || "FANGAK"} logoText={band.logoText} logoImage={band.logoImage} />
       <main className="inner-page">
         <PageIntro eyebrow="Listen close" title="Music for the moment." copy="Find our latest tracks and releases. Listen on your favorite platform, or settle in with an embedded player." />
         <section className="music-list">
+          {music.map((item) => <MusicCard key={`music-${item.id}`} music={item} />)}
           {tracks.length ? tracks.map((track) => <TrackCard key={track.id} track={track} />) : (
-            <div className="empty-state"><span className="empty-record" aria-hidden="true">F.</span><h2>New music is on the way.</h2><p>Check back soon for tracks, embeds and links to listen everywhere.</p></div>
+            music.length === 0 && <div className="empty-state"><span className="empty-record" aria-hidden="true">F.</span><h2>New music is on the way.</h2><p>Check back soon for tracks, embeds and links to listen everywhere.</p></div>
           )}
         </section>
         {releases.length > 0 && <section className="section-wrap release-section">
