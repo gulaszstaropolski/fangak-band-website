@@ -20,7 +20,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 ::selection { color: var(--paper); background: var(--orange); }
 
 .site-header { height: 82px; display: flex; align-items: center; justify-content: space-between; padding: 0 6.25%; background: var(--paper); position: relative; z-index: 4; }
-.wordmark { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.09em; }
+.wordmark { display: inline-flex; align-items: center; gap: .3rem; font-size: 1.45rem; font-weight: 700; letter-spacing: -0.09em; }
 .logo-image { width: auto; height: 42px; object-fit: contain; }
 .wordmark-dot { color: var(--orange); }
 .main-nav { display: flex; align-items: center; gap: clamp(1rem, 2.8vw, 2.8rem); font-size: .79rem; font-weight: 600; }

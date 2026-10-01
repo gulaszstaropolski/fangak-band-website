@@ -9,6 +9,7 @@ export function ContactForm({ fields }: { fields?: ContactFormField[] }) {
   const [sending, setSending] = useState(false);
   const configuredFields = (fields ?? []).filter((field) =>
     /^[a-z][a-z0-9_-]{0,49}$/.test(field.name) &&
+    field.name !== "website" &&
     field.label &&
     ["text", "email", "tel", "textarea"].includes(field.type),
   );

@@ -29,12 +29,16 @@ export async function POST(request: Request) {
   }
   body += decoder.decode();
 
-  let fields: Record<string, unknown>;
+  let parsed: unknown;
   try {
-    fields = JSON.parse(body) as Record<string, unknown>;
+    parsed = JSON.parse(body) as unknown;
   } catch {
     return NextResponse.json({ message: "Invalid request." }, { status: 400 });
   }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return NextResponse.json({ message: "Invalid request." }, { status: 400 });
+  }
+  const fields = parsed as Record<string, unknown>;
 
   if (typeof fields.website === "string" && fields.website.trim()) {
     return NextResponse.json({ message: "Thanks for getting in touch." });
@@ -43,6 +47,7 @@ export async function POST(request: Request) {
   const contact = await getContact();
   const configuredFields = (contact?.formFields ?? []).filter((field) =>
     /^[a-z][a-z0-9_-]{0,49}$/.test(field.name) &&
+    field.name !== "website" &&
     field.label &&
     ["text", "email", "tel", "textarea"].includes(field.type),
   );
@@ -56,7 +61,7 @@ export async function POST(request: Request) {
       ((field.required ?? false) && !value) ||
       value.length > maxLength ||
       (field.name === "name" && /[\u0000-\u001f\u007f]/.test(value)) ||
-      (field.name === "message" && value.length < 10) ||
+      (field.name === "message" && value && value.length < 10) ||
       (field.type === "email" && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
     ) {
       return NextResponse.json({ message: "Please check your details and try again." }, { status: 400 });

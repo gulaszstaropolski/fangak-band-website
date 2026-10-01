@@ -1,5 +1,4 @@
 import type { Video } from "@/lib/content";
-import { safeExternalUrl } from "@/components/music";
 
 function youtubeId(value?: string): string | undefined {
   if (!value) return undefined;
@@ -24,7 +23,7 @@ function youtubeId(value?: string): string | undefined {
 
 export function VideoCard({ video }: { video: Video }) {
   const embedId = youtubeId(video.youtubeUrl) ?? youtubeId(video.youtubeEmbedCode);
-  const watchUrl = safeExternalUrl(video.youtubeUrl);
+  const watchUrl = embedId ? `https://www.youtube.com/watch?v=${embedId}` : undefined;
   return (
     <article className="video-card">
       {embedId ? (

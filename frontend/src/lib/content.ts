@@ -237,5 +237,3 @@ export async function getTeam(): Promise<TeamMember[]> {
     photo: imageUrl((member as TeamMember & { photo?: unknown }).photo),
   }));
 }
-import type { ContactFormField } from "@/lib/contact-fields";
-export type { ContactFormField } from "@/lib/contact-fields";

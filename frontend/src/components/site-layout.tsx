@@ -14,7 +14,8 @@ export function SiteHeader({ name, logoText, logoImage }: { name: string; logoTe
   return (
     <header className="site-header">
       <Link className="wordmark" href="/" aria-label={`${name} home`}>
-        {logoImage ? <Image src={logoImage} alt={logoText || name} width={160} height={56} className="logo-image" /> : logoText || name}
+        {logoImage && <Image src={logoImage} alt="" width={160} height={56} className="logo-image" />}
+        <span>{logoText || name}</span>
         <span className="wordmark-dot">.</span>
       </Link>
       <nav className="main-nav" aria-label="Main navigation">
