@@ -4,7 +4,7 @@
   "info": {
     "singularName": "gallery-image",
     "pluralName": "gallery-images",
-    "displayName": "Gallery image"
+    "displayName": "Gallery item"
   },
   "options": {
     "draftAndPublish": true
@@ -17,6 +17,13 @@
     },
     "caption": {
       "type": "text"
+    },
+    "description": {
+      "type": "text"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
     },
     "image": {
       "type": "media",

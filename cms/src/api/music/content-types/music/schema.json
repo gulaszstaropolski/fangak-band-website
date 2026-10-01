@@ -17,9 +17,24 @@
       "minLength": 1,
       "maxLength": 150
     },
+    "artist": {
+      "type": "string",
+      "maxLength": 150
+    },
     "description": {
-      "type": "text",
-      "maxLength": 2000
+      "type": "richtext"
+    },
+    "releaseDate": {
+      "type": "date"
+    },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
     },
     "bandcampUrl": {
       "type": "string",

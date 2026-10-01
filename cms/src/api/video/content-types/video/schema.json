@@ -18,8 +18,7 @@
       "maxLength": 150
     },
     "description": {
-      "type": "text",
-      "maxLength": 2000
+      "type": "richtext"
     },
     "youtubeUrl": {
       "type": "string",
@@ -30,6 +29,18 @@
     "youtubeEmbedCode": {
       "type": "text",
       "maxLength": 5000
+    },
+    "releaseDate": {
+      "type": "date"
+    },
+    "thumbnail": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
     }
   }
 }
