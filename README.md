@@ -41,7 +41,7 @@ An English-language, responsive band website built with Next.js and Strapi. It i
 
 ## Managing content
 
-Use the Strapi admin panel to edit **Home**, add **Page** entries, music links, YouTube videos, gallery items, About text, tracks, releases, events, and team members. Home and Settings fall back to existing Band info and starter content until published. Page entries with slugs matching existing routes replace those route contents. For Music, paste a SoundCloud track URL or Bandcamp EmbeddedPlayer URL; YouTube accepts a video URL or 11-character video ID. Gallery, Music, and Video items are ordered by their `order` field. Contact manages the form description and fields; the Settings contact email is used as a fallback recipient.
+Use the Strapi admin panel to edit **Home**, add **Page** entries, music links, YouTube videos, gallery items, About text, tracks, releases, events, and team members. Home and Settings fall back to existing Band info and starter content until published. Page entries with slugs matching existing routes replace those route contents. For Music, paste a SoundCloud track URL or a standard Bandcamp album/track URL (resolved to a player through Bandcamp oEmbed) or EmbeddedPlayer URL; YouTube accepts a video URL or 11-character video ID. Gallery, Music, and Video items are ordered by their `order` field. Contact manages the form description and fields; the Settings contact email is used as a fallback recipient.
 
 `streamingLinks` and `socialLinks` are JSON arrays in this format:
 
