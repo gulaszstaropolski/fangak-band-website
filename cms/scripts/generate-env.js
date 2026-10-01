@@ -30,7 +30,8 @@ if (!fs.existsSync(examplePath)) {
   process.exit(1);
 }
 
-const generateSecret = () => crypto.randomBytes(32).toString('base64');
+const SECRET_BYTE_LENGTH = 32;
+const generateSecret = () => crypto.randomBytes(SECRET_BYTE_LENGTH).toString('base64');
 
 const secretKeys = {
   APP_KEYS: () => [generateSecret(), generateSecret()].join(','),
@@ -41,7 +42,7 @@ const secretKeys = {
   ENCRYPTION_KEY: generateSecret,
 };
 
-const lines = fs.readFileSync(examplePath, 'utf8').split('\n');
+const lines = fs.readFileSync(examplePath, 'utf8').replace(/\r\n/g, '\n').split('\n');
 
 const output = lines
   .map((line) => {
