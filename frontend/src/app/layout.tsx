@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getBand } from "@/lib/content";
+import { getSettings } from "@/lib/content";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,10 +19,22 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const band = await getBand();
+  const settings = await getSettings();
+  const style: React.CSSProperties = {
+    ...(settings.backgroundImage
+      ? {
+          backgroundImage: `url(${JSON.stringify(settings.backgroundImage)})`,
+          backgroundSize: "cover",
+          backgroundAttachment: "fixed",
+          backgroundPosition: "center",
+        }
+      : {}),
+    ...(settings.primaryColor ? ({ "--orange": settings.primaryColor } as React.CSSProperties) : {}),
+    ...(settings.secondaryColor ? ({ "--ink": settings.secondaryColor } as React.CSSProperties) : {}),
+  };
   return (
     <html lang="en">
-      <body style={band.backgroundImage ? { backgroundImage: `url(${JSON.stringify(band.backgroundImage)})`, backgroundSize: "cover", backgroundAttachment: "fixed", backgroundPosition: "center" } : undefined}>{children}</body>
+      <body style={Object.keys(style).length ? style : undefined}>{children}</body>
     </html>
   );
 }

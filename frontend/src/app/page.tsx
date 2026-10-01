@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { safeExternalUrl, StreamingLinks, TrackCard } from "@/components/music";
 import { SiteFooter, SiteHeader } from "@/components/site-layout";
-import { getBand, getUpcomingEvents, getTracks } from "@/lib/content";
+import { getBand, getSettings, getUpcomingEvents, getTracks } from "@/lib/content";
 
 export const metadata = {
   title: "FANGAK — Independent music",
@@ -11,10 +11,18 @@ export const metadata = {
 export const revalidate = 60;
 
 export default async function Home() {
-  const [band, tracks, events] = await Promise.all([getBand(), getTracks(), getUpcomingEvents()]);
+  const [band, settings, tracks, events] = await Promise.all([
+    getBand(),
+    getSettings(),
+    getTracks(),
+    getUpcomingEvents(),
+  ]);
   const featured = tracks.find((track) => track.featured) ?? tracks[0];
   const nextEvent = events[0];
   const ticketUrl = safeExternalUrl(nextEvent?.ticketUrl);
+  const heading = settings.heading || band.name || "FANGAK";
+  const subtitle = settings.subtitle || band.tagline || "Independent music, made to move you.";
+  const description = settings.description || band.bio;
 
   return (
     <>
@@ -27,7 +35,7 @@ export default async function Home() {
               "@context": "https://schema.org",
               "@type": "MusicGroup",
               name: band.name || "FANGAK",
-              description: band.bio || band.tagline,
+              description: description || band.tagline,
               url: process.env.NEXT_PUBLIC_SITE_URL,
               sameAs: band.socialLinks?.map((link) => safeExternalUrl(link.url)).filter(Boolean),
             }).replace(/</g, "\\u003c"),
@@ -37,8 +45,8 @@ export default async function Home() {
           <div className="hero-texture" aria-hidden="true" />
           <div className="hero-content">
             <p className="eyebrow">Independent band · Est. in sound</p>
-            <h1>{band.name || "FANGAK"}</h1>
-            <p className="hero-tagline">{band.tagline || "Independent music, made to move you."}</p>
+            <h1>{heading}</h1>
+            <p className="hero-tagline">{subtitle}</p>
             <div className="hero-actions">
               <Link className="button button-light" href="/music">Explore the music <span>↗</span></Link>
               <Link className="text-link" href="/events">Find us live <span>↗</span></Link>
@@ -70,7 +78,7 @@ export default async function Home() {
         <section className="home-about">
           <div><p className="eyebrow">A little about us</p><h2>Made together.<br /><em>Felt everywhere.</em></h2></div>
           <div className="home-about-copy">
-            <p>{band.bio || "A band, a shared love of sound, and a story still being written. Get to know the people and ideas behind the music."}</p>
+            <p>{description || "A band, a shared love of sound, and a story still being written. Get to know the people and ideas behind the music."}</p>
             <Link className="button button-dark" href="/about">Meet the band <span>↗</span></Link>
           </div>
         </section>

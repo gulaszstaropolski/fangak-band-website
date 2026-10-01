@@ -18,6 +18,18 @@ export type Band = {
   streamingLinks?: StreamingLink[];
 };
 
+export type Settings = {
+  logo?: string;
+  logoText?: string;
+  backgroundImage?: string;
+  heading?: string;
+  subtitle?: string;
+  description?: string;
+  footerText?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+};
+
 export type Music = {
   id: number;
   title: string;
@@ -159,6 +171,37 @@ export async function getBand(): Promise<Band> {
     };
   } catch {
     return { name: "FANGAK", tagline: "Independent music, made to move you." };
+  }
+}
+
+const defaultSettings: Settings = {
+  logoText: "FANGAK",
+  heading: "FANGAK",
+  subtitle: "Independent music, made to move you.",
+  primaryColor: "#f36d3b",
+  secondaryColor: "#171715",
+};
+
+export async function getSettings(): Promise<Settings> {
+  if (!cmsUrl) return defaultSettings;
+  try {
+    const response = await fetch(`${cmsUrl}/api/settings?populate=*`, {
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) return defaultSettings;
+    const json = (await response.json()) as { data?: unknown };
+    if (!json.data) return defaultSettings;
+    const settings = normalize<Settings>(json.data);
+    return {
+      ...defaultSettings,
+      ...settings,
+      logo: imageUrl((settings as Settings & { logo?: unknown }).logo) ?? defaultSettings.logo,
+      backgroundImage:
+        imageUrl((settings as Settings & { backgroundImage?: unknown }).backgroundImage) ??
+        defaultSettings.backgroundImage,
+    };
+  } catch {
+    return defaultSettings;
   }
 }
 

@@ -25,7 +25,9 @@ An English-language, responsive band website built with Next.js and Strapi. It i
 
    This copies `.env.example` to `.env` and fills in `APP_KEYS`, `API_TOKEN_SALT`, `ADMIN_JWT_SECRET`, `TRANSFER_TOKEN_SALT`, `JWT_SECRET`, and `ENCRYPTION_KEY` with freshly generated secrets (the file is never committed, see `.gitignore`). Alternatively, run `cp .env.example .env` and replace every `replace-with-...` value yourself (for example with `openssl rand -base64 32`). Start the CMS with `npm run develop`, then create the first administrator at <http://localhost:1337/admin>.
 
-3. The CMS includes the **Music**, **Stream**, **Video**, **Contact**, and **About** content types, along with the existing tracks, releases, events, gallery, and team types. Add and publish entries in Strapi to show them on the website. Public API routes are read-only; editing still requires the Strapi admin account.
+3. The CMS includes the **Music**, **Stream**, **Video**, **Contact**, **About**, and **Settings** content types, along with the existing tracks, releases, events, gallery, and team types. Add and publish entries in Strapi to show them on the website. Public API routes are read-only; editing still requires the Strapi admin account.
+
+   The **Settings** single type lets you manage the site-wide logo, logo text, background image, heading, subtitle, description, footer text, and primary/secondary colors directly from the Strapi admin panel — no code changes required.
 
 4. Configure and start the frontend:
 
