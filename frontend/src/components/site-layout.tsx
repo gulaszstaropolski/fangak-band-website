@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getSettings } from "@/lib/content";
 
 const navigation = [
   ["About", "/about"],
@@ -10,12 +11,15 @@ const navigation = [
   ["Contact", "/contact"],
 ] as const;
 
-export function SiteHeader({ name, logoText, logoImage }: { name: string; logoText?: string; logoImage?: string }) {
+export async function SiteHeader({ name, logoText, logoImage }: { name: string; logoText?: string; logoImage?: string }) {
+  const settings = await getSettings();
+  const resolvedLogoImage = settings.logo || logoImage;
+  const resolvedLogoText = settings.logoText || logoText || name;
   return (
     <header className="site-header">
       <Link className="wordmark" href="/" aria-label={`${name} home`}>
-        {logoImage && <Image src={logoImage} alt="" width={160} height={56} className="logo-image" />}
-        <span>{logoText || name}</span>
+        {resolvedLogoImage && <Image src={resolvedLogoImage} alt="" width={160} height={56} className="logo-image" />}
+        <span>{resolvedLogoText}</span>
         <span className="wordmark-dot">.</span>
       </Link>
       <nav className="main-nav" aria-label="Main navigation">
@@ -32,11 +36,12 @@ export function SiteHeader({ name, logoText, logoImage }: { name: string; logoTe
   );
 }
 
-export function SiteFooter({ name }: { name: string }) {
+export async function SiteFooter({ name }: { name: string }) {
+  const settings = await getSettings();
   return (
     <footer className="site-footer">
       <span>© {new Date().getFullYear()} {name}</span>
-      <span>Made for the love of live music.</span>
+      <span>{settings.footerText || "Made for the love of live music."}</span>
       <Link href="/contact">Get in touch ↗</Link>
     </footer>
   );
