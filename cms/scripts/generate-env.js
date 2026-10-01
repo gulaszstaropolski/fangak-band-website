@@ -45,15 +45,23 @@ const secretKeys = {
 
 const lines = fs.readFileSync(examplePath, 'utf8').replace(/\r\n/g, '\n').split('\n');
 
+const replacedKeys = new Set();
+
 const output = lines
   .map((line) => {
     const match = line.match(/^([A-Z0-9_]+)=/);
     if (match && Object.prototype.hasOwnProperty.call(secretKeys, match[1])) {
+      replacedKeys.add(match[1]);
       return `${match[1]}=${secretKeys[match[1]]()}`;
     }
     return line;
   })
   .join('\n');
 
+const missingKeys = Object.keys(secretKeys).filter((key) => !replacedKeys.has(key));
+if (missingKeys.length > 0) {
+  console.warn(`Warning: the following keys were not found in .env.example and were not generated: ${missingKeys.join(', ')}`);
+}
+
 fs.writeFileSync(envPath, output, { mode: 0o600 });
-console.log(`Generated ${envPath} with fresh secrets for: ${Object.keys(secretKeys).join(', ')}`);
+console.log(`Generated ${envPath} with fresh secrets for: ${[...replacedKeys].join(', ')}`);
