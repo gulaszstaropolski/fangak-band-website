@@ -25,7 +25,7 @@ An English-language, responsive band website built with Next.js and Strapi. It i
 
    This copies `.env.example` to `.env` and fills in `APP_KEYS`, `API_TOKEN_SALT`, `ADMIN_JWT_SECRET`, `TRANSFER_TOKEN_SALT`, `JWT_SECRET`, and `ENCRYPTION_KEY` with freshly generated secrets (the file is never committed, see `.gitignore`). Alternatively, run `cp .env.example .env` and replace every `replace-with-...` value yourself (for example with `openssl rand -base64 32`). Start the CMS with `npm run develop`, then create the first administrator at <http://localhost:1337/admin>.
 
-3. Create content types in Strapi and publish entries for them to appear on the website. The CMS exposes unauthenticated, read-only `GET` endpoints for published content; editing still requires the Strapi admin account.
+3. The CMS includes the **Music**, **Stream**, **Video**, **Contact**, and **About** content types, along with the existing tracks, releases, events, gallery, and team types. Add and publish entries in Strapi to show them on the website. Public API routes are read-only; editing still requires the Strapi admin account.
 
 4. Configure and start the frontend:
 
@@ -39,7 +39,7 @@ An English-language, responsive band website built with Next.js and Strapi. It i
 
 ## Managing content
 
-Use the Strapi admin panel to add a **Band info** entry, tracks, releases, gallery photos, events, and team members. Mark one track as featured to select it for the home page. For embedded players, paste the provider's HTTPS embed URL into the corresponding `...EmbedUrl` field. Only Bandcamp, SoundCloud, and Spotify hosts are allowed in player embeds.
+Use the Strapi admin panel to add a **Band info** entry, Music and Stream links, YouTube videos, About text, tracks, releases, gallery photos, events, and team members. Band info manages the site name, logo image, logo text, and background image. Contact manages the destination email, form description, and optional configurable form fields. Mark one track as featured to select it for the home page. For embedded players, paste the provider's HTTPS embed URL into the corresponding `...EmbedUrl` field. Only Bandcamp, SoundCloud, and Spotify hosts are allowed in player embeds.
 
 `streamingLinks` and `socialLinks` are JSON arrays in this format:
 
@@ -54,7 +54,7 @@ Supported platform labels include Bandcamp, SoundCloud, Spotify, Apple Music, Yo
 
 ## Contact form
 
-The contact form sends messages through SMTP. Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, and `CONTACT_TO` in `frontend/.env.local` (or the production environment). Without SMTP settings the site remains usable and the form explains that sending is not configured. Never commit real credentials.
+The contact form sends messages through SMTP. Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM` in `frontend/.env.local` (or the production environment). The published Contact email is used as the recipient; `CONTACT_TO` remains a fallback if no Contact entry is published. Without SMTP settings the site remains usable and the form explains that sending is not configured. Never commit real credentials.
 
 ## Production build
 

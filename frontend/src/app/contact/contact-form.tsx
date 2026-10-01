@@ -2,10 +2,18 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { defaultContactFields, type ContactFormField } from "@/lib/contact-fields";
 
-export function ContactForm() {
+export function ContactForm({ fields }: { fields?: ContactFormField[] }) {
   const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
+  const configuredFields = (fields ?? []).filter((field) =>
+    /^[a-z][a-z0-9_-]{0,49}$/.test(field.name) &&
+    field.name !== "website" &&
+    field.label &&
+    ["text", "email", "tel", "textarea"].includes(field.type),
+  );
+  const formFields = configuredFields.length ? configuredFields : defaultContactFields;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,9 +39,26 @@ export function ContactForm() {
 
   return (
     <form className="contact-form" onSubmit={submit}>
-      <label>Your name<input name="name" autoComplete="name" required maxLength={100} /></label>
-      <label>Email address<input type="email" name="email" autoComplete="email" required maxLength={254} /></label>
-      <label>Your message<textarea name="message" rows={5} required minLength={10} maxLength={5000} /></label>
+      {formFields.map((field) => {
+        const maxLength = Math.min(5000, Math.max(1, field.maxLength ?? 500));
+        const props = {
+          name: field.name,
+          required: field.required ?? false,
+          maxLength,
+          placeholder: field.placeholder,
+          ...(field.name === "name" ? { autoComplete: "name" } : {}),
+          ...(field.name === "email" ? { autoComplete: "email" } : {}),
+        };
+        return (
+          <label key={field.id ?? field.name}>{field.label}
+            {field.type === "textarea" ? (
+              <textarea {...props} rows={5} minLength={field.name === "message" ? 10 : undefined} />
+            ) : (
+              <input {...props} type={field.type} />
+            )}
+          </label>
+        );
+      })}
       <label className="honeypot" aria-hidden="true">Leave this field empty<input name="website" tabIndex={-1} autoComplete="off" /></label>
       <button className="button button-dark" type="submit" disabled={sending}>{sending ? "Sending…" : "Send message ↗"}</button>
       <p className="form-status" role="status" aria-live="polite">{status}</p>

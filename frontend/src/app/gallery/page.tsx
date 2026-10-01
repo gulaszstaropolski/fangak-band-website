@@ -9,7 +9,7 @@ export default async function GalleryPage() {
   const [band, photos] = await Promise.all([getBand(), getGallery()]);
   return (
     <>
-      <SiteHeader name={band.name || "FANGAK"} />
+      <SiteHeader name={band.name || "FANGAK"} logoText={band.logoText} logoImage={band.logoImage} />
       <main className="inner-page">
         <PageIntro eyebrow="Loud nights, good people" title="Life in the frame." copy="A few moments from the stage, the road and everywhere the music takes us." />
         {photos.length ? <div className="gallery-grid">{photos.map((photo, index) => <figure className={`gallery-tile gallery-tile-${index % 5}`} key={photo.id}>

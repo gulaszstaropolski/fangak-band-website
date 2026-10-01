@@ -18,7 +18,7 @@ export default async function Home() {
 
   return (
     <>
-      <SiteHeader name={band.name || "FANGAK"} />
+      <SiteHeader name={band.name || "FANGAK"} logoText={band.logoText} logoImage={band.logoImage} />
       <main>
         <script
           type="application/ld+json"

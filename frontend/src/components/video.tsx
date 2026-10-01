@@ -1,0 +1,47 @@
+import type { Video } from "@/lib/content";
+
+function youtubeId(value?: string): string | undefined {
+  if (!value) return undefined;
+  const embedSource = value.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1] ?? value;
+  try {
+    const url = new URL(embedSource);
+    if (url.protocol !== "https:") return undefined;
+    const host = url.hostname.toLowerCase();
+    let id: string | undefined;
+    if (host === "youtu.be") {
+      id = url.pathname.split("/").filter(Boolean)[0];
+    } else if (
+      ["youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"].includes(host)
+    ) {
+      id = url.searchParams.get("v") ?? url.pathname.match(/^\/(?:embed|shorts|live)\/([^/]+)/)?.[1];
+    }
+    return id && /^[A-Za-z0-9_-]{11}$/.test(id) ? id : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function VideoCard({ video }: { video: Video }) {
+  const embedId = youtubeId(video.youtubeUrl) ?? youtubeId(video.youtubeEmbedCode);
+  const watchUrl = embedId ? `https://www.youtube.com/watch?v=${embedId}` : undefined;
+  return (
+    <article className="video-card">
+      {embedId ? (
+        <iframe
+          className="video-embed"
+          src={`https://www.youtube-nocookie.com/embed/${embedId}`}
+          title={video.title}
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-presentation"
+        />
+      ) : watchUrl ? (
+        <a className="video-fallback" href={watchUrl} target="_blank" rel="noreferrer">
+          Watch {video.title} on YouTube ↗
+        </a>
+      ) : null}
+      <div><h2>{video.title}</h2>{video.description && <p>{video.description}</p>}</div>
+    </article>
+  );
+}
