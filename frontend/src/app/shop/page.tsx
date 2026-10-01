@@ -1,12 +1,14 @@
 import { StreamingLinks } from "@/components/music";
+import { CMSPageView } from "@/components/cms-page";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
-import { getBand, getStreams } from "@/lib/content";
+import { getBand, getPage, getStreams } from "@/lib/content";
 
 export const metadata = { title: "Shop" };
 export const revalidate = 60;
 
 export default async function ShopPage() {
-  const [band, streams] = await Promise.all([getBand(), getStreams()]);
+  const [band, streams, page] = await Promise.all([getBand(), getStreams(), getPage("shop")]);
+  if (page) return <CMSPageView page={page} />;
   const platformLinks = streams.length
     ? streams.map((stream) => ({ platform: stream.platformName || stream.title, url: stream.platformUrl }))
     : band.streamingLinks;

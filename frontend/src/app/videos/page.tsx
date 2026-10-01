@@ -1,12 +1,14 @@
 import { VideoCard } from "@/components/video";
+import { CMSPageView } from "@/components/cms-page";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
-import { getBand, getVideos } from "@/lib/content";
+import { getBand, getPage, getVideos } from "@/lib/content";
 
 export const metadata = { title: "Videos" };
 export const revalidate = 60;
 
 export default async function VideosPage() {
-  const [band, videos] = await Promise.all([getBand(), getVideos()]);
+  const [band, videos, page] = await Promise.all([getBand(), getVideos(), getPage("videos")]);
+  if (page) return <CMSPageView page={page} />;
   return (
     <>
       <SiteHeader name={band.name || "FANGAK"} logoText={band.logoText} logoImage={band.logoImage} />

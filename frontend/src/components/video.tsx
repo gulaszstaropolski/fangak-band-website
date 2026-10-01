@@ -1,7 +1,9 @@
+import { VideoPlayer } from "@/components/video-player";
 import type { Video } from "@/lib/content";
 
 function youtubeId(value?: string): string | undefined {
   if (!value) return undefined;
+  if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
   const embedSource = value.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1] ?? value;
   try {
     const url = new URL(embedSource);
@@ -27,14 +29,10 @@ export function VideoCard({ video }: { video: Video }) {
   return (
     <article className="video-card">
       {embedId ? (
-        <iframe
-          className="video-embed"
-          src={`https://www.youtube-nocookie.com/embed/${embedId}`}
+        <VideoPlayer
+          videoId={embedId}
           title={video.title}
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerPolicy="strict-origin-when-cross-origin"
-          sandbox="allow-scripts allow-same-origin allow-presentation"
+          thumbnail={video.thumbnail || `https://img.youtube.com/vi/${embedId}/hqdefault.jpg`}
         />
       ) : watchUrl ? (
         <a className="video-fallback" href={watchUrl} target="_blank" rel="noreferrer">

@@ -23,8 +23,7 @@
     "youtubeUrl": {
       "type": "string",
       "required": true,
-      "maxLength": 2048,
-      "regex": "^https://"
+      "maxLength": 2048
     },
     "youtubeEmbedCode": {
       "type": "text",
