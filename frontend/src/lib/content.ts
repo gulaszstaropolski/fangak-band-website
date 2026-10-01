@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { ContactFormField } from "@/lib/contact-fields";
 export type { ContactFormField } from "@/lib/contact-fields";
 
@@ -182,7 +183,7 @@ const defaultSettings: Settings = {
   secondaryColor: "#171715",
 };
 
-export async function getSettings(): Promise<Settings> {
+export const getSettings = cache(async (): Promise<Settings> => {
   if (!cmsUrl) return defaultSettings;
   try {
     const response = await fetch(`${cmsUrl}/api/settings?populate=*`, {
@@ -203,7 +204,7 @@ export async function getSettings(): Promise<Settings> {
   } catch {
     return defaultSettings;
   }
-}
+});
 
 export async function getMusic(): Promise<Music[]> {
   return collection<Music>("musics", "sort=createdAt:desc");
