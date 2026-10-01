@@ -31,10 +31,11 @@ if (!fs.existsSync(examplePath)) {
 }
 
 const SECRET_BYTE_LENGTH = 32;
-const generateSecret = () => crypto.randomBytes(SECRET_BYTE_LENGTH).toString('base64');
+const APP_KEYS_COUNT = 2;
+const generateSecret = () => crypto.randomBytes(SECRET_BYTE_LENGTH).toString('base64url');
 
 const secretKeys = {
-  APP_KEYS: () => [generateSecret(), generateSecret()].join(','),
+  APP_KEYS: () => Array.from({ length: APP_KEYS_COUNT }, generateSecret).join(','),
   API_TOKEN_SALT: generateSecret,
   ADMIN_JWT_SECRET: generateSecret,
   TRANSFER_TOKEN_SALT: generateSecret,
