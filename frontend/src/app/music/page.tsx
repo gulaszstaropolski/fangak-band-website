@@ -1,10 +1,12 @@
 import Image from "next/image";
-import { CMSPageView } from "@/components/cms-page";
+import { CMSPageView, getPageMetadata } from "@/components/cms-page";
 import { MusicCard, safeExternalUrl, StreamingLinks, TrackCard } from "@/components/music";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
 import { getBand, getMusic, getPage, getReleases, getTracks } from "@/lib/content";
 
-export const metadata = { title: "Music" };
+export async function generateMetadata() {
+  return getPageMetadata("music", "Music");
+}
 export const revalidate = 60;
 
 export default async function MusicPage() {

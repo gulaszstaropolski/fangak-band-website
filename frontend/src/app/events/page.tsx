@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { CMSPageView } from "@/components/cms-page";
+import { CMSPageView, getPageMetadata } from "@/components/cms-page";
 import { safeExternalUrl } from "@/components/music";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
 import { getBand, getPage, getUpcomingEvents } from "@/lib/content";
 
-export const metadata = { title: "Tour dates" };
+export async function generateMetadata() {
+  return getPageMetadata("events", "Tour dates");
+}
 export const revalidate = 60;
 
 export default async function EventsPage() {

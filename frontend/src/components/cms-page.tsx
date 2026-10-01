@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import type { CMSSection, Page } from "@/lib/content";
 import { SiteFooter, SiteHeader } from "@/components/site-layout";
-import { getSettings } from "@/lib/content";
+import { getPage, getSettings } from "@/lib/content";
 
 function paragraphs(value?: string) {
   return value
@@ -20,6 +21,15 @@ function safeLink(value?: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+export async function getPageMetadata(slug: string, fallbackTitle: string): Promise<Metadata> {
+  const page = await getPage(slug);
+  const description = page?.seoDescription || page?.subheading;
+  return {
+    title: page?.seoTitle || fallbackTitle,
+    ...(description ? { description } : {}),
+  };
 }
 
 export function CMSSections({ sections = [] }: { sections?: CMSSection[] }) {

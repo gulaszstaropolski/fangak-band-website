@@ -1,9 +1,11 @@
 import Image from "next/image";
-import { CMSPageView } from "@/components/cms-page";
+import { CMSPageView, getPageMetadata } from "@/components/cms-page";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
 import { getBand, getGallery, getPage } from "@/lib/content";
 
-export const metadata = { title: "Gallery" };
+export async function generateMetadata() {
+  return getPageMetadata("gallery", "Gallery");
+}
 export const revalidate = 60;
 
 export default async function GalleryPage() {

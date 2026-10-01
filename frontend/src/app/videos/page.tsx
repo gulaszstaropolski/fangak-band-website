@@ -1,9 +1,11 @@
 import { VideoCard } from "@/components/video";
-import { CMSPageView } from "@/components/cms-page";
+import { CMSPageView, getPageMetadata } from "@/components/cms-page";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
 import { getBand, getPage, getVideos } from "@/lib/content";
 
-export const metadata = { title: "Videos" };
+export async function generateMetadata() {
+  return getPageMetadata("videos", "Videos");
+}
 export const revalidate = 60;
 
 export default async function VideosPage() {

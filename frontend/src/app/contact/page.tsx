@@ -1,10 +1,12 @@
 import { ContactForm } from "./contact-form";
-import { CMSPageView } from "@/components/cms-page";
+import { CMSPageView, getPageMetadata } from "@/components/cms-page";
 import { StreamingLinks } from "@/components/music";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
 import { getBand, getContact, getPage, getSettings } from "@/lib/content";
 
-export const metadata = { title: "Contact" };
+export async function generateMetadata() {
+  return getPageMetadata("contact", "Contact");
+}
 export const revalidate = 60;
 
 export default async function ContactPage() {
