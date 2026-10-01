@@ -1,7 +1,19 @@
 import type { NextConfig } from "next";
 
+const cmsUrl = process.env.STRAPI_URL ? new URL(process.env.STRAPI_URL) : undefined;
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
+  images: {
+    remotePatterns: cmsUrl
+      ? [{
+          protocol: cmsUrl.protocol.replace(":", "") as "http" | "https",
+          hostname: cmsUrl.hostname,
+          port: cmsUrl.port || undefined,
+          pathname: "/uploads/**",
+        }]
+      : [],
+  },
 };
 
 export default nextConfig;

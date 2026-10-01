@@ -1,0 +1,36 @@
+{
+  "kind": "singleType",
+  "collectionName": "band_infos",
+  "info": {
+    "singularName": "band-info",
+    "pluralName": "band-infos",
+    "displayName": "Band info"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "tagline": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "richtext"
+    },
+    "heroImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "socialLinks": {
+      "type": "json"
+    },
+    "streamingLinks": {
+      "type": "json"
+    }
+  }
+}
