@@ -20,10 +20,10 @@ An English-language, responsive band website built with Next.js and Strapi. It i
 
    ```sh
    cd cms
-   cp .env.example .env
+   npm run env:generate
    ```
 
-   Replace every `replace-with-...` value in `cms/.env` with a unique, randomly generated secret. Start the CMS with `npm run develop`, then create the first administrator at <http://localhost:1337/admin>.
+   This copies `.env.example` to `.env` and fills in `APP_KEYS`, `API_TOKEN_SALT`, `ADMIN_JWT_SECRET`, `TRANSFER_TOKEN_SALT`, `JWT_SECRET`, and `ENCRYPTION_KEY` with freshly generated secrets (the file is never committed, see `.gitignore`). Alternatively, run `cp .env.example .env` and replace every `replace-with-...` value yourself (for example with `openssl rand -base64 32`). Start the CMS with `npm run develop`, then create the first administrator at <http://localhost:1337/admin>.
 
 3. Create content types in Strapi and publish entries for them to appear on the website. The CMS exposes unauthenticated, read-only `GET` endpoints for published content; editing still requires the Strapi admin account.
 
