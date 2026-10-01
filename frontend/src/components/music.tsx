@@ -73,20 +73,72 @@ export function StreamingLinks({ links = [] }: { links?: StreamingLink[] }) {
   );
 }
 
-export function MusicCard({ music }: { music: Music }) {
+export async function MusicCard({ music }: { music: Music }) {
   const bandcampUrl = safeExternalUrl(music.bandcampUrl);
   const soundcloudUrl = safeExternalUrl(music.soundcloudUrl);
+  const bandcampPlayerUrl = await bandcampEmbedUrl(bandcampUrl);
+  const soundcloudPlayerUrl = soundcloudWidgetUrl(soundcloudUrl);
   return (
     <article className="music-entry">
       <p className="eyebrow">Music</p>
       <h2>{music.title}</h2>
+      {music.artist && <p className="eyebrow">{music.artist}</p>}
+      {music.cover && <Image src={music.cover} alt={`${music.title} cover`} width={240} height={240} className="music-cover" />}
+      {music.releaseDate && <p className="eyebrow">{new Date(music.releaseDate).getUTCFullYear()}</p>}
       {music.description && <p>{music.description}</p>}
       <div className="track-platforms">
         {bandcampUrl && <a href={bandcampUrl} target="_blank" rel="noreferrer">Bandcamp ↗</a>}
         {soundcloudUrl && <a href={soundcloudUrl} target="_blank" rel="noreferrer">SoundCloud ↗</a>}
       </div>
+      {bandcampPlayerUrl && <MusicEmbed src={bandcampPlayerUrl} title={`${music.title} on Bandcamp`} />}
+      {soundcloudPlayerUrl && <MusicEmbed src={soundcloudPlayerUrl} title={`${music.title} on SoundCloud`} />}
     </article>
   );
+}
+
+function isBandcampUrl(url: URL): boolean {
+  return url.protocol === "https:" &&
+    (url.hostname === "bandcamp.com" || url.hostname.endsWith(".bandcamp.com"));
+}
+
+async function bandcampEmbedUrl(value?: string): Promise<string | undefined> {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    if (!isBandcampUrl(url)) return undefined;
+    if (url.pathname.startsWith("/EmbeddedPlayer/")) return url.toString();
+
+    const oEmbedUrl = new URL("https://bandcamp.com/oembed");
+    oEmbedUrl.searchParams.set("url", url.toString());
+    const response = await fetch(oEmbedUrl, {
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) return undefined;
+    const result = (await response.json()) as { html?: unknown };
+    if (typeof result.html !== "string") return undefined;
+    const src = result.html.match(/<iframe\b[^>]*\bsrc=["']([^"']+)["']/i)?.[1];
+    if (!src) return undefined;
+    const playerUrl = new URL(src.replace(/&amp;/g, "&"), "https://bandcamp.com");
+    return isBandcampUrl(playerUrl) && playerUrl.pathname.startsWith("/EmbeddedPlayer/")
+      ? playerUrl.toString()
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function soundcloudWidgetUrl(value?: string): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || (url.hostname !== "soundcloud.com" && !url.hostname.endsWith(".soundcloud.com"))) {
+      return undefined;
+    }
+    return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url.toString())}`;
+  } catch {
+    return undefined;
+  }
 }
 
 function MusicEmbed({ src, title }: { src?: string; title: string }) {

@@ -20,8 +20,11 @@ export type Band = {
 };
 
 export type Settings = {
+  siteName?: string;
+  siteDescription?: string;
   logo?: string;
   logoText?: string;
+  favicon?: string;
   backgroundImage?: string;
   heading?: string;
   subtitle?: string;
@@ -29,14 +32,66 @@ export type Settings = {
   footerText?: string;
   primaryColor?: string;
   secondaryColor?: string;
+  socialLinks?: StreamingLink[];
+  contactEmail?: string;
+  contactPhone?: string;
+};
+
+export type CTA = {
+  label: string;
+  link: string;
+};
+
+export type CMSSection = {
+  __component: string;
+  id?: number;
+  heading?: string;
+  subheading?: string;
+  content?: string;
+  backgroundImage?: string;
+  images?: string[];
+};
+
+export type HomeContent = {
+  logo?: string;
+  logoText?: string;
+  backgroundImage?: string;
+  heading?: string;
+  subheading?: string;
+  description?: string;
+  primaryCTA?: CTA;
+  secondaryCTA?: CTA;
+  primaryColor?: string;
+  secondaryColor?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: string;
+  sections?: CMSSection[];
+};
+
+export type Page = {
+  id: number;
+  title: string;
+  slug: string;
+  backgroundImage?: string;
+  heading?: string;
+  subheading?: string;
+  content?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  sections?: CMSSection[];
 };
 
 export type Music = {
   id: number;
   title: string;
+  artist?: string;
   description?: string;
   bandcampUrl?: string;
   soundcloudUrl?: string;
+  releaseDate?: string;
+  cover?: string;
+  order?: number;
 };
 
 export type Stream = {
@@ -53,6 +108,9 @@ export type Video = {
   description?: string;
   youtubeUrl: string;
   youtubeEmbedCode?: string;
+  releaseDate?: string;
+  thumbnail?: string;
+  order?: number;
 };
 
 export type Contact = {
@@ -96,8 +154,10 @@ export type GalleryImage = {
   id: number;
   title: string;
   caption?: string;
+  description?: string;
   image?: string;
   date?: string;
+  order?: number;
 };
 
 export type Event = {
@@ -133,6 +193,18 @@ function imageUrl(value: unknown): string | undefined {
   return candidate.startsWith("/") && cmsUrl
     ? `${new URL(cmsUrl).origin}${candidate}`
     : candidate;
+}
+
+function imageUrls(value: unknown): string[] {
+  const media = value && typeof value === "object"
+    ? value as { data?: unknown }
+    : undefined;
+  const items = Array.isArray(value)
+    ? value
+    : Array.isArray(media?.data)
+      ? media.data
+      : [];
+  return items.map(imageUrl).filter((image): image is string => Boolean(image));
 }
 
 function normalize<T>(entry: unknown): T {
@@ -176,6 +248,7 @@ export async function getBand(): Promise<Band> {
 }
 
 const defaultSettings: Settings = {
+  siteDescription: "Official home of FANGAK: music, live dates, photos and more.",
   logoText: "FANGAK",
   heading: "FANGAK",
   subtitle: "Independent music, made to move you.",
@@ -197,6 +270,7 @@ export const getSettings = cache(async (): Promise<Settings> => {
       ...defaultSettings,
       ...settings,
       logo: imageUrl((settings as Settings & { logo?: unknown }).logo) ?? defaultSettings.logo,
+      favicon: imageUrl((settings as Settings & { favicon?: unknown }).favicon),
       backgroundImage:
         imageUrl((settings as Settings & { backgroundImage?: unknown }).backgroundImage) ??
         defaultSettings.backgroundImage,
@@ -206,8 +280,46 @@ export const getSettings = cache(async (): Promise<Settings> => {
   }
 });
 
+export async function getHome(): Promise<HomeContent | undefined> {
+  const home = await single<HomeContent>("home");
+  if (!home) return undefined;
+  return {
+    ...home,
+    logo: imageUrl((home as HomeContent & { logo?: unknown }).logo),
+    backgroundImage: imageUrl((home as HomeContent & { backgroundImage?: unknown }).backgroundImage),
+    seoImage: imageUrl((home as HomeContent & { seoImage?: unknown }).seoImage),
+    sections: home.sections?.map((section) => ({
+      ...section,
+      backgroundImage: imageUrl((section as CMSSection & { backgroundImage?: unknown }).backgroundImage),
+      images: imageUrls((section as CMSSection & { images?: unknown }).images),
+    })),
+  };
+}
+
+export async function getPage(slug: string): Promise<Page | undefined> {
+  const pages = await collection<Page>(
+    "pages",
+    `filters[slug][$eq]=${encodeURIComponent(slug)}`,
+  );
+  const page = pages[0];
+  if (!page) return undefined;
+  return {
+    ...page,
+    backgroundImage: imageUrl((page as Page & { backgroundImage?: unknown }).backgroundImage),
+    sections: page.sections?.map((section) => ({
+      ...section,
+      backgroundImage: imageUrl((section as CMSSection & { backgroundImage?: unknown }).backgroundImage),
+      images: imageUrls((section as CMSSection & { images?: unknown }).images),
+    })),
+  };
+}
+
 export async function getMusic(): Promise<Music[]> {
-  return collection<Music>("musics", "sort=createdAt:desc");
+  const music = await collection<Music>("musics", "sort[0]=order:asc&sort[1]=releaseDate:desc");
+  return music.map((item) => ({
+    ...item,
+    cover: imageUrl((item as Music & { cover?: unknown }).cover),
+  }));
 }
 
 export async function getStreams(): Promise<Stream[]> {
@@ -215,7 +327,11 @@ export async function getStreams(): Promise<Stream[]> {
 }
 
 export async function getVideos(): Promise<Video[]> {
-  return collection<Video>("videos", "sort=createdAt:desc");
+  const videos = await collection<Video>("videos", "sort[0]=order:asc&sort[1]=releaseDate:desc");
+  return videos.map((video) => ({
+    ...video,
+    thumbnail: imageUrl((video as Video & { thumbnail?: unknown }).thumbnail),
+  }));
 }
 
 async function single<T>(type: string): Promise<T | undefined> {
@@ -257,7 +373,7 @@ export async function getReleases(): Promise<Release[]> {
 }
 
 export async function getGallery(): Promise<GalleryImage[]> {
-  const gallery = await collection<GalleryImage>("gallery-images", "sort=date:desc");
+  const gallery = await collection<GalleryImage>("gallery-images", "sort[0]=order:asc&sort[1]=date:desc");
   return gallery.map((item) => ({
     ...item,
     image: imageUrl((item as GalleryImage & { image?: unknown }).image),

@@ -1,12 +1,16 @@
 import Image from "next/image";
+import { CMSPageView, getPageMetadata } from "@/components/cms-page";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
-import { getAbout, getBand, getTeam } from "@/lib/content";
+import { getAbout, getBand, getPage, getTeam } from "@/lib/content";
 
-export const metadata = { title: "About" };
+export async function generateMetadata() {
+  return getPageMetadata("about", "About");
+}
 export const revalidate = 60;
 
 export default async function AboutPage() {
-  const [band, about, team] = await Promise.all([getBand(), getAbout(), getTeam()]);
+  const [band, about, team, page] = await Promise.all([getBand(), getAbout(), getTeam(), getPage("about")]);
+  if (page) return <CMSPageView page={page} />;
   const description = about?.description || band.bio;
   const history = about?.historyText || band.bio;
   return (

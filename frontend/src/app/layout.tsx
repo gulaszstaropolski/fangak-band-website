@@ -1,25 +1,35 @@
 import type { Metadata } from "next";
-import { getSettings } from "@/lib/content";
+import { getHome, getSettings } from "@/lib/content";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  ...(process.env.NEXT_PUBLIC_SITE_URL
-    ? { metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL) }
-    : {}),
-  title: {
-    default: "FANGAK — Independent music",
-    template: "%s | FANGAK",
-  },
-  description: "Official home of FANGAK: music, live dates, photos and more.",
-  openGraph: {
-    type: "website",
-    title: "FANGAK — Independent music",
-    description: "Discover music, stories and upcoming live shows from FANGAK.",
-  },
-};
+function validColor(value?: string): string | undefined {
+  return value && /^#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i.test(value)
+    ? value
+    : undefined;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const name = settings.siteName || "FANGAK";
+  const description = settings.siteDescription || "Official home of FANGAK: music, live dates, photos and more.";
+  return {
+    ...(process.env.NEXT_PUBLIC_SITE_URL
+      ? { metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL) }
+      : {}),
+    title: {
+      default: name,
+      template: `%s | ${name}`,
+    },
+    description,
+    openGraph: { type: "website", title: name, description },
+    ...(settings.favicon ? { icons: { icon: settings.favicon } } : {}),
+  };
+}
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const settings = await getSettings();
+  const [settings, home] = await Promise.all([getSettings(), getHome()]);
+  const primaryColor = validColor(settings.primaryColor || home?.primaryColor);
+  const secondaryColor = validColor(settings.secondaryColor || home?.secondaryColor);
   const style: React.CSSProperties = {
     ...(settings.backgroundImage
       ? {
@@ -29,8 +39,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           backgroundPosition: "center",
         }
       : {}),
-    ...(settings.primaryColor ? ({ "--orange": settings.primaryColor } as React.CSSProperties) : {}),
-    ...(settings.secondaryColor ? ({ "--ink": settings.secondaryColor } as React.CSSProperties) : {}),
+    ...(primaryColor ? ({ "--orange": primaryColor } as React.CSSProperties) : {}),
+    ...(secondaryColor ? ({ "--ink": secondaryColor } as React.CSSProperties) : {}),
   };
   return (
     <html lang="en">

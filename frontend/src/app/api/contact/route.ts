@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { defaultContactFields, type ContactFormField } from "@/lib/contact-fields";
-import { getContact } from "@/lib/content";
+import { getContact, getSettings } from "@/lib/content";
 
 export const runtime = "nodejs";
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Thanks for getting in touch." });
   }
 
-  const contact = await getContact();
+  const [contact, settings] = await Promise.all([getContact(), getSettings()]);
   const configuredFields = (contact?.formFields ?? []).filter((field) =>
     /^[a-z][a-z0-9_-]{0,49}$/.test(field.name) &&
     field.name !== "website" &&
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
   const host = process.env.SMTP_HOST;
   const from = process.env.SMTP_FROM;
-  const to = contact?.email?.trim() || process.env.CONTACT_TO;
+  const to = contact?.email?.trim() || settings.contactEmail?.trim() || process.env.CONTACT_TO;
   const port = Number(process.env.SMTP_PORT || 587);
   if (!host || !from || !to || !Number.isInteger(port) || port < 1 || port > 65535) {
     return NextResponse.json({ message: "Contact form email is not configured yet. Please try again later." }, { status: 503 });

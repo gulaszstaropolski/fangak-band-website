@@ -1,13 +1,17 @@
 import Link from "next/link";
+import { CMSPageView, getPageMetadata } from "@/components/cms-page";
 import { safeExternalUrl } from "@/components/music";
 import { PageIntro, SiteFooter, SiteHeader } from "@/components/site-layout";
-import { getBand, getUpcomingEvents } from "@/lib/content";
+import { getBand, getPage, getUpcomingEvents } from "@/lib/content";
 
-export const metadata = { title: "Tour dates" };
+export async function generateMetadata() {
+  return getPageMetadata("events", "Tour dates");
+}
 export const revalidate = 60;
 
 export default async function EventsPage() {
-  const [band, upcoming] = await Promise.all([getBand(), getUpcomingEvents()]);
+  const [band, upcoming, page] = await Promise.all([getBand(), getUpcomingEvents(), getPage("events")]);
+  if (page) return <CMSPageView page={page} />;
   return (
     <>
       <SiteHeader name={band.name || "FANGAK"} logoText={band.logoText} logoImage={band.logoImage} />

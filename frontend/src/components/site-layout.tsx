@@ -11,13 +11,26 @@ const navigation = [
   ["Contact", "/contact"],
 ] as const;
 
-export async function SiteHeader({ name, logoText, logoImage }: { name: string; logoText?: string; logoImage?: string }) {
+export async function SiteHeader({
+  name,
+  logoText,
+  logoImage,
+  preferProvidedLogo = false,
+}: {
+  name: string;
+  logoText?: string;
+  logoImage?: string;
+  preferProvidedLogo?: boolean;
+}) {
   const settings = await getSettings();
-  const resolvedLogoImage = settings.logo || logoImage;
-  const resolvedLogoText = settings.logoText || logoText || name;
+  const resolvedName = settings.siteName || name;
+  const resolvedLogoImage = preferProvidedLogo ? logoImage || settings.logo : settings.logo || logoImage;
+  const resolvedLogoText = preferProvidedLogo
+    ? logoText || settings.logoText || resolvedName
+    : settings.logoText || logoText || resolvedName;
   return (
     <header className="site-header">
-      <Link className="wordmark" href="/" aria-label={`${name} home`}>
+      <Link className="wordmark" href="/" aria-label={`${resolvedName} home`}>
         {resolvedLogoImage && <Image src={resolvedLogoImage} alt="" width={160} height={56} className="logo-image" />}
         <span>{resolvedLogoText}</span>
         <span className="wordmark-dot">.</span>
@@ -38,9 +51,10 @@ export async function SiteHeader({ name, logoText, logoImage }: { name: string; 
 
 export async function SiteFooter({ name }: { name: string }) {
   const settings = await getSettings();
+  const resolvedName = settings.siteName || name;
   return (
     <footer className="site-footer">
-      <span>© {new Date().getFullYear()} {name}</span>
+      <span>© {new Date().getFullYear()} {resolvedName}</span>
       <span>{settings.footerText || "Made for the love of live music."}</span>
       <Link href="/contact">Get in touch ↗</Link>
     </footer>
