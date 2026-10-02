@@ -177,7 +177,17 @@ export type TeamMember = {
   photo?: string;
 };
 
-const cmsUrl = process.env.STRAPI_URL?.replace(/\/$/, "");
+const cmsUrl = (
+  process.env.STRAPI_URL ??
+  (process.env.NODE_ENV === "production" ? undefined : "http://localhost:1337")
+)?.replace(/\/$/, "");
+const REVALIDATE_SECONDS = process.env.NODE_ENV === "production" ? 60 : 0;
+
+function logCmsError(url: string, reason: unknown) {
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(`[cms] Failed to fetch ${url}:`, reason);
+  }
+}
 
 function imageUrl(value: unknown): string | undefined {
   if (!value || typeof value !== "object") return undefined;
@@ -217,12 +227,16 @@ async function collection<T>(type: string, query = ""): Promise<T[]> {
   if (!cmsUrl) return [];
   try {
     const response = await fetch(`${cmsUrl}/api/${type}?populate=*&${query}`, {
-      next: { revalidate: 60 },
+      next: { revalidate: REVALIDATE_SECONDS },
     });
-    if (!response.ok) return [];
+    if (!response.ok) {
+      logCmsError(`${cmsUrl}/api/${type}`, `HTTP ${response.status}`);
+      return [];
+    }
     const json = (await response.json()) as { data?: unknown[] };
     return (json.data ?? []).map((entry) => normalize<T>(entry));
-  } catch {
+  } catch (error) {
+    logCmsError(`${cmsUrl}/api/${type}`, error);
     return [];
   }
 }
@@ -231,7 +245,7 @@ export async function getBand(): Promise<Band> {
   if (!cmsUrl) return { name: "FANGAK", tagline: "Independent music, made to move you." };
   try {
     const response = await fetch(`${cmsUrl}/api/band-info?populate=*`, {
-      next: { revalidate: 60 },
+      next: { revalidate: REVALIDATE_SECONDS },
     });
     if (!response.ok) return { name: "FANGAK", tagline: "Independent music, made to move you." };
     const json = (await response.json()) as { data?: unknown };
@@ -260,7 +274,7 @@ export const getSettings = cache(async (): Promise<Settings> => {
   if (!cmsUrl) return defaultSettings;
   try {
     const response = await fetch(`${cmsUrl}/api/settings?populate=*`, {
-      next: { revalidate: 60 },
+      next: { revalidate: REVALIDATE_SECONDS },
     });
     if (!response.ok) return defaultSettings;
     const json = (await response.json()) as { data?: unknown };
@@ -338,12 +352,16 @@ async function single<T>(type: string): Promise<T | undefined> {
   if (!cmsUrl) return undefined;
   try {
     const response = await fetch(`${cmsUrl}/api/${type}?populate=*`, {
-      next: { revalidate: 60 },
+      next: { revalidate: REVALIDATE_SECONDS },
     });
-    if (!response.ok) return undefined;
+    if (!response.ok) {
+      logCmsError(`${cmsUrl}/api/${type}`, `HTTP ${response.status}`);
+      return undefined;
+    }
     const json = (await response.json()) as { data?: unknown };
     return json.data ? normalize<T>(json.data) : undefined;
-  } catch {
+  } catch (error) {
+    logCmsError(`${cmsUrl}/api/${type}`, error);
     return undefined;
   }
 }

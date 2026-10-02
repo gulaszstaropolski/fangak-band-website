@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
-const cmsUrl = process.env.STRAPI_URL
-  ? new URL(process.env.STRAPI_URL)
-  : undefined;
+const strapiUrl =
+  process.env.STRAPI_URL ??
+  (process.env.NODE_ENV === "production" ? undefined : "http://localhost:1337");
+const cmsUrl = strapiUrl ? new URL(strapiUrl) : undefined;
 
 const nextConfig: NextConfig = {
   output: "standalone",
