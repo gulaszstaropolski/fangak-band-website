@@ -215,15 +215,22 @@ function logCmsError(url: string, reason: unknown) {
 }
 
 function imageUrl(value: unknown): string | undefined {
-  if (!value || typeof value !== "object") return undefined;
-  const media = value as { url?: string; data?: unknown; attributes?: { url?: string } };
-  const candidate =
-    media.url ??
-    media.attributes?.url ??
-    (media.data && typeof media.data === "object"
-      ? (media.data as { url?: string; attributes?: { url?: string } }).url ??
-        (media.data as { attributes?: { url?: string } }).attributes?.url
-      : undefined);
+  // Strapi v5 returns flat media ({ url }); v4/relation shapes nest it in data/attributes, and
+  // multiple media (or data) may be arrays, so unwrap every known layer.
+  let media: unknown = value;
+  for (let depth = 0; depth < 4 && media && typeof media === "object"; depth += 1) {
+    if (Array.isArray(media)) {
+      media = media[0];
+      continue;
+    }
+    const record = media as { url?: unknown; data?: unknown; attributes?: unknown };
+    if (typeof record.url === "string" && record.url) {
+      media = record.url;
+      break;
+    }
+    media = record.attributes ?? record.data;
+  }
+  const candidate = typeof media === "string" ? media : undefined;
   if (!candidate) return undefined;
   return candidate.startsWith("/") && cmsUrl
     ? `${new URL(cmsUrl).origin}${candidate}`
@@ -324,7 +331,7 @@ export const getSettings = cache(async (): Promise<Settings> => {
 });
 
 export async function getHome(): Promise<HomeContent | undefined> {
-  const home = await single<HomeContent>("home", `populate[logo]=true&populate[backgroundImage]=true&populate[seoImage]=true&populate[primaryCTA]=true&populate[secondaryCTA]=true&populate[slides][populate]=*&${sectionsPopulate}`);
+  const home = await single<HomeContent>("home", `populate[logo]=true&populate[backgroundImage]=true&populate[seoImage]=true&populate[primaryCTA]=true&populate[secondaryCTA]=true&populate[slides][populate][backgroundImage]=true&${sectionsPopulate}`);
   if (!home) return undefined;
   const rawSlides = Array.isArray(home.slides) ? home.slides : [];
   const slides = rawSlides

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { NavSlideMarker } from "@/components/nav-slide-marker";
 import { getNavigation, getSettings } from "@/lib/content";
 
 export async function SiteHeader({
@@ -27,8 +28,9 @@ export async function SiteHeader({
         <span className="wordmark-dot">.</span>
       </Link>
       <nav className="main-nav" aria-label="Main navigation">
+        <NavSlideMarker hrefs={navigation.map(({ href }) => href)} />
         {navigation.map(({ label, href }) => (
-          <Link key={href} href={href} className={href === "/shop" ? "nav-shop" : undefined}>
+          <Link key={href} href={href} data-nav-href={href} className={href === "/shop" ? "nav-shop" : undefined}>
             {label}
           </Link>
         ))}

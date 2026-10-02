@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { HeroSlide } from "@/lib/content";
 import { CMSLink } from "@/components/cms-link";
+import { HERO_NAV_EVENT } from "@/components/nav-slide-marker";
 
 const INTERVAL_MS = 7000;
 
@@ -30,6 +31,16 @@ export function HeroCarousel({ slides, label = "Featured" }: { slides: HeroSlide
     return () => window.clearInterval(timer);
   }, [rotating, count, index]);
 
+  const currentUrl = current?.ctaUrl;
+  useEffect(() => {
+    window.__heroNavHref = currentUrl;
+    window.dispatchEvent(new CustomEvent(HERO_NAV_EVENT, { detail: currentUrl }));
+    return () => {
+      window.__heroNavHref = undefined;
+      window.dispatchEvent(new CustomEvent(HERO_NAV_EVENT, { detail: undefined }));
+    };
+  }, [currentUrl]);
+
   if (!current) return null;
   const go = (next: number) => setIndex((next + count) % count);
 
@@ -45,20 +56,23 @@ export function HeroCarousel({ slides, label = "Featured" }: { slides: HeroSlide
         if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
       }}
     >
-      {slides.map((slide, slideIndex) =>
-        slide.image ? (
-          <Image
-            key={slide.id ?? slideIndex}
-            src={slide.image}
-            alt={slideIndex === index ? slide.imageAlt ?? "" : ""}
-            aria-hidden={slideIndex !== index}
-            fill
-            priority={slideIndex === 0}
-            sizes="100vw"
-            className={`hero-photo hero-slide-image${slideIndex === index ? " is-active" : ""}`}
-          />
-        ) : null,
-      )}
+      <div className="hero-slide-media" aria-hidden="true">
+        {slides.map((slide, slideIndex) => {
+          const distance = Math.min((slideIndex - index + count) % count, (index - slideIndex + count) % count);
+          if (!slide.image || distance > 1) return null;
+          return (
+            <Image
+              key={slide.id ?? slideIndex}
+              src={slide.image}
+              alt=""
+              fill
+              priority={slideIndex === 0}
+              sizes="100vw"
+              className={`hero-photo hero-slide-image${slideIndex === index ? " is-active" : ""}`}
+            />
+          );
+        })}
+      </div>
       <div className="hero-texture" aria-hidden="true" />
       <div
         className="hero-content hero-slide-content"
@@ -78,33 +92,27 @@ export function HeroCarousel({ slides, label = "Featured" }: { slides: HeroSlide
         </div>
       </div>
       {multiple && (
-        <div className="hero-controls">
-          <button type="button" onClick={() => go(index - 1)} aria-label="Previous slide">‹</button>
-          <ul className="hero-dots">
-            {slides.map((slide, slideIndex) => (
-              <li key={slide.id ?? slideIndex}>
-                <button
-                  type="button"
-                  onClick={() => go(slideIndex)}
-                  aria-label={`Go to slide ${slideIndex + 1}${slide.heading ? `: ${slide.heading}` : ""}`}
-                  aria-current={slideIndex === index ? "true" : undefined}
-                  className={slideIndex === index ? "is-active" : undefined}
-                />
-              </li>
-            ))}
-          </ul>
-          <button type="button" onClick={() => go(index + 1)} aria-label="Next slide">›</button>
-          {!reducedMotion && (
-            <button
-              type="button"
-              onClick={() => setPaused((value) => !value)}
-              aria-pressed={paused}
-              aria-label={paused ? "Start automatic rotation" : "Pause automatic rotation"}
-            >
-              {paused ? "▶" : "❚❚"}
-            </button>
-          )}
-        </div>
+        <ul className="hero-dots" aria-label="Slides">
+          {slides.map((slide, slideIndex) => (
+            <li key={slide.id ?? slideIndex}>
+              <button
+                type="button"
+                onClick={() => go(slideIndex)}
+                onKeyDown={(event) => {
+                  if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+                    event.preventDefault();
+                    const next = (slideIndex + (event.key === "ArrowRight" ? 1 : -1) + count) % count;
+                    go(next);
+                    (event.currentTarget.closest("ul")?.querySelectorAll("button")[next] as HTMLElement | undefined)?.focus();
+                  }
+                }}
+                aria-label={`Go to slide ${slideIndex + 1}${slide.heading ? `: ${slide.heading}` : ""}`}
+                aria-current={slideIndex === index ? "true" : undefined}
+                className={slideIndex === index ? "is-active" : undefined}
+              />
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );
