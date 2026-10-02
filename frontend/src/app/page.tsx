@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { CMSLink, CMSSections } from "@/components/cms-page";
 import { safeExternalUrl, StreamingLinks, TrackCard } from "@/components/music";
+import { HeroCarousel } from "@/components/hero-carousel";
 import { SiteFooter, SiteHeader } from "@/components/site-layout";
 import { getBand, getHome, getSettings, getUpcomingEvents, getTracks } from "@/lib/content";
 
@@ -55,6 +56,9 @@ export default async function Home() {
             }).replace(/</g, "\\u003c"),
           }}
         />
+        {home?.slides?.length ? (
+          <HeroCarousel slides={home.slides} label={`${siteName} highlights`} />
+        ) : (
         <section
           className="hero"
           style={heroImage ? {
@@ -84,6 +88,7 @@ export default async function Home() {
           {!home && <div className="hero-sticker" aria-hidden="true"><span>TURN IT</span><strong>UP!</strong></div>}
           {!home && <span className="hero-index">01 / SOUND IN MOTION</span>}
         </section>
+        )}
 
         {home ? (
           <>

@@ -35,6 +35,23 @@
     "content": {
       "type": "richtext"
     },
+    "buttons": {
+      "type": "component",
+      "repeatable": true,
+      "component": "home.cta"
+    },
+    "showInNavigation": {
+      "type": "boolean",
+      "default": false
+    },
+    "navigationLabel": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "navigationOrder": {
+      "type": "integer",
+      "default": 0
+    },
     "seoTitle": {
       "type": "string"
     },

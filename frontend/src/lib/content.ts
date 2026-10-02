@@ -50,12 +50,30 @@ export type CMSSection = {
   content?: string;
   backgroundImage?: string;
   images?: string[];
+  ctaLabel?: string;
+  ctaUrl?: string;
+};
+
+export type HeroSlide = {
+  id?: number;
+  image?: string;
+  imageAlt?: string;
+  heading?: string;
+  description?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+};
+
+export type NavItem = {
+  label: string;
+  href: string;
 };
 
 export type HomeContent = {
   logo?: string;
   logoText?: string;
   backgroundImage?: string;
+  slides?: HeroSlide[];
   heading?: string;
   subheading?: string;
   description?: string;
@@ -77,6 +95,10 @@ export type Page = {
   heading?: string;
   subheading?: string;
   content?: string;
+  buttons?: CTA[];
+  showInNavigation?: boolean;
+  navigationLabel?: string;
+  navigationOrder?: number;
   seoTitle?: string;
   seoDescription?: string;
   sections?: CMSSection[];
@@ -182,6 +204,9 @@ const cmsUrl = (
   (process.env.NODE_ENV === "production" ? undefined : "http://localhost:1337")
 )?.replace(/\/$/, "");
 const REVALIDATE_SECONDS = 0;
+const sectionsPopulate = ["page.hero", "page.content", "page.gallery"]
+  .map((component) => `populate[sections][on][${component}][populate]=*`)
+  .join("&");
 
 function logCmsError(url: string, reason: unknown) {
   if (process.env.NODE_ENV !== "production") {
@@ -217,6 +242,10 @@ function imageUrls(value: unknown): string[] {
   return items.map(imageUrl).filter((image): image is string => Boolean(image));
 }
 
+function textOrUndefined(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
 function normalize<T>(entry: unknown): T {
   if (!entry || typeof entry !== "object") return entry as T;
   const record = entry as { attributes?: Record<string, unknown> } & Record<string, unknown>;
@@ -226,7 +255,7 @@ function normalize<T>(entry: unknown): T {
 async function collection<T>(type: string, query = ""): Promise<T[]> {
   if (!cmsUrl) return [];
   try {
-    const response = await fetch(`${cmsUrl}/api/${type}?populate=*&${query}`, {
+    const response = await fetch(`${cmsUrl}/api/${type}?${/(^|&)populate/.test(query) ? "" : "populate=*&"}${query}`, {
       next: { revalidate: REVALIDATE_SECONDS },
     });
     if (!response.ok) {
@@ -295,10 +324,32 @@ export const getSettings = cache(async (): Promise<Settings> => {
 });
 
 export async function getHome(): Promise<HomeContent | undefined> {
-  const home = await single<HomeContent>("home");
+  const home = await single<HomeContent>("home", `populate[logo]=true&populate[backgroundImage]=true&populate[seoImage]=true&populate[primaryCTA]=true&populate[secondaryCTA]=true&populate[slides][populate]=*&${sectionsPopulate}`);
   if (!home) return undefined;
+  const rawSlides = Array.isArray(home.slides) ? home.slides : [];
+  const slides = rawSlides
+    .map((slide, index) => {
+      const raw = slide as unknown as Record<string, unknown>;
+      return {
+        index,
+        order: typeof raw.order === "number" ? raw.order : 0,
+        slide: {
+          id: typeof raw.id === "number" ? raw.id : undefined,
+          image: imageUrl(raw.backgroundImage),
+          imageAlt: textOrUndefined(raw.imageAlt),
+          heading: textOrUndefined(raw.heading),
+          description: textOrUndefined(raw.description),
+          ctaLabel: textOrUndefined(raw.ctaLabel),
+          ctaUrl: textOrUndefined(raw.ctaUrl),
+        } satisfies HeroSlide,
+      };
+    })
+    .filter(({ slide }) => slide.image || slide.heading || slide.description)
+    .sort((a, b) => a.order - b.order || a.index - b.index)
+    .map(({ slide }) => slide);
   return {
     ...home,
+    slides,
     logo: imageUrl((home as HomeContent & { logo?: unknown }).logo),
     backgroundImage: imageUrl((home as HomeContent & { backgroundImage?: unknown }).backgroundImage),
     seoImage: imageUrl((home as HomeContent & { seoImage?: unknown }).seoImage),
@@ -313,7 +364,7 @@ export async function getHome(): Promise<HomeContent | undefined> {
 export async function getPage(slug: string): Promise<Page | undefined> {
   const pages = await collection<Page>(
     "pages",
-    `filters[slug][$eq]=${encodeURIComponent(slug)}`,
+    `filters[slug][$eq]=${encodeURIComponent(slug)}&populate[backgroundImage]=true&populate[buttons]=true&${sectionsPopulate}`,
   );
   const page = pages[0];
   if (!page) return undefined;
@@ -326,6 +377,35 @@ export async function getPage(slug: string): Promise<Page | undefined> {
       images: imageUrls((section as CMSSection & { images?: unknown }).images),
     })),
   };
+}
+
+const defaultNavigation: NavItem[] = [
+  { label: "About", href: "/about" },
+  { label: "Music", href: "/music" },
+  { label: "Videos", href: "/videos" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Tour", href: "/events" },
+  { label: "Contact", href: "/contact" },
+  { label: "Shop ↗", href: "/shop" },
+];
+
+export const getNavigation = cache(async (): Promise<NavItem[]> => {
+  const pages = await collection<Page>(
+    "pages",
+    "filters[showInNavigation][$eq]=true&populate[buttons]=true&pagination[pageSize]=100&sort[0]=navigationOrder:asc&sort[1]=title:asc",
+  );
+  const items = pages
+    .filter((page) => page.slug && page.showInNavigation)
+    .map((page) => ({
+      label: page.navigationLabel || page.title || page.slug,
+      href: `/${page.slug}`,
+    }));
+  return items.length ? items : defaultNavigation;
+});
+
+export async function getPageSlugs(): Promise<string[]> {
+  const pages = await collection<Page>("pages", "populate[buttons]=true&pagination[pageSize]=100&fields[0]=slug");
+  return pages.map((page) => page.slug).filter(Boolean);
 }
 
 export async function getMusic(): Promise<Music[]> {
@@ -348,10 +428,10 @@ export async function getVideos(): Promise<Video[]> {
   }));
 }
 
-async function single<T>(type: string): Promise<T | undefined> {
+async function single<T>(type: string, populate = "populate=*"): Promise<T | undefined> {
   if (!cmsUrl) return undefined;
   try {
-    const response = await fetch(`${cmsUrl}/api/${type}?populate=*`, {
+    const response = await fetch(`${cmsUrl}/api/${type}?${populate}`, {
       next: { revalidate: REVALIDATE_SECONDS },
     });
     if (!response.ok) {

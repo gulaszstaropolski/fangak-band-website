@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Metadata } from "next";
 import type { CMSSection, Page } from "@/lib/content";
+import { CMSLink, safeLink } from "@/components/cms-link";
 import { SiteFooter, SiteHeader } from "@/components/site-layout";
 import { getPage, getSettings } from "@/lib/content";
 
@@ -10,17 +10,6 @@ function paragraphs(value?: string) {
     ?.split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
-}
-
-function safeLink(value?: string): string | undefined {
-  if (!value) return undefined;
-  if (value.startsWith("/") && !value.startsWith("//")) return value;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" ? url.toString() : undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 export async function getPageMetadata(slug: string, fallbackTitle: string): Promise<Metadata> {
@@ -43,6 +32,9 @@ export function CMSSections({ sections = [] }: { sections?: CMSSection[] }) {
           <div className="hero-content">
             <h2>{section.heading}</h2>
             {section.subheading && <p className="hero-tagline">{section.subheading}</p>}
+            {section.ctaLabel && section.ctaUrl && (
+              <div className="hero-actions"><CMSLink className="button button-light" label={section.ctaLabel} href={section.ctaUrl} /></div>
+            )}
           </div>
         </section>
       );
@@ -92,6 +84,11 @@ export async function CMSPageView({ page }: { page: Page }) {
           </div>
         )}
         {paragraphs(page.content)?.map((paragraph, index) => <p className="cms-page-content" key={index}>{paragraph}</p>)}
+        {page.buttons?.some((button) => button.label && safeLink(button.link)) && (
+          <div className="section-wrap hero-actions cms-page-buttons">
+            {page.buttons.map((button, index) => <CMSLink key={index} className="button button-dark" label={button.label} href={button.link} />)}
+          </div>
+        )}
         <CMSSections sections={page.sections} />
       </main>
       <SiteFooter name={name} />
@@ -99,19 +96,4 @@ export async function CMSPageView({ page }: { page: Page }) {
   );
 }
 
-export function CMSLink({
-  label,
-  href,
-  className,
-}: {
-  label: string;
-  href: string;
-  className?: string;
-}) {
-  const url = safeLink(href);
-  if (!url) return null;
-  const content = <>{label} <span aria-hidden="true">↗</span></>;
-  return url.startsWith("/")
-    ? <Link className={className} href={url}>{content}</Link>
-    : <a className={className} href={url} target="_blank" rel="noreferrer">{content}</a>;
-}
+export { CMSLink };

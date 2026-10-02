@@ -1,0 +1,35 @@
+{
+  "collectionName": "components_home_slides",
+  "info": {
+    "displayName": "Hero slide"
+  },
+  "options": {},
+  "attributes": {
+    "backgroundImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "imageAlt": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "heading": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "ctaLabel": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "ctaUrl": {
+      "type": "string"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}

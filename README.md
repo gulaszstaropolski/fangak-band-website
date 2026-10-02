@@ -43,6 +43,16 @@ An English-language, responsive band website built with Next.js and Strapi. It i
 
 Use the Strapi admin panel to edit **Home**, add **Page** entries, music links, YouTube videos, gallery items, About text, tracks, releases, events, and team members. Home and Settings fall back to existing Band info and starter content until published. Page entries with slugs matching existing routes replace those route contents. For Music, paste a SoundCloud track URL or a standard Bandcamp album/track URL (resolved to a player through Bandcamp oEmbed) or EmbeddedPlayer URL; YouTube accepts a video URL or 11-character video ID. Gallery, Music, and Video items are ordered by their `order` field. Contact manages the form description and fields; the Settings contact email is used as a fallback recipient.
 
+### Pages and navigation
+
+- Create, edit, publish, unpublish, or delete entries under **Page**. A published page renders at `/<slug>`; unpublished or deleted pages return 404 and drop out of the navigation. Slugs of built-in routes (`about`, `music`, `videos`, `events`, `gallery`, `contact`, `shop`) replace that route's content; if the page is missing the built-in fallback content is shown.
+- Each Page has a title, heading, subheading, text, optional background image, **Buttons** (label + link; relative `/path` or `https://` URLs), and optional sections (Hero sections can also carry a CTA label and URL).
+- Navigation: tick **Show in navigation** on a Page, optionally set **Navigation label** and **Navigation order** (lower first). When at least one published page is flagged, the header shows exactly those pages; otherwise the default menu (About, Music, Videos, Gallery, Tour, Contact, Shop) is used.
+
+### Homepage hero slides
+
+In **Home → Slides** add repeatable **Hero slide** entries: background image, image alt text (leave empty for decorative images), headline, description, CTA label, CTA URL, and an optional numeric order (lower first; ties keep the drag-and-drop order in Strapi). Delete a slide to remove it. Slides rotate automatically every 7 seconds; the CTA stays in the same place and links to the current slide's URL. Visitors get previous/next buttons, slide indicators, and a pause button; rotation pauses on hover/focus and is disabled for users who prefer reduced motion. With no slides the homepage uses the single heading/background/CTA fields; one slide is shown without controls. Remember to publish Home after editing. Public API routes stay read-only.
+
 `streamingLinks` and `socialLinks` are JSON arrays in this format:
 
 ```json
