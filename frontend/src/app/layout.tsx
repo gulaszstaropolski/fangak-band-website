@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getHome, getSettings } from "@/lib/content";
 import "./globals.css";
 
+export const revalidate = 0;
+
 function validColor(value?: string): string | undefined {
   return value && /^#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i.test(value)
     ? value
@@ -28,8 +30,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const [settings, home] = await Promise.all([getSettings(), getHome()]);
-  const primaryColor = validColor(settings.primaryColor || home?.primaryColor);
-  const secondaryColor = validColor(settings.secondaryColor || home?.secondaryColor);
+  const primaryColor = validColor(home?.primaryColor || settings.primaryColor);
+  const secondaryColor = validColor(home?.secondaryColor || settings.secondaryColor);
   const style: React.CSSProperties = {
     ...(settings.backgroundImage
       ? {

@@ -39,7 +39,11 @@ export function VideoCard({ video }: { video: Video }) {
           Watch {video.title} on YouTube ↗
         </a>
       ) : null}
-      <div><h2>{video.title}</h2>{video.description && <p>{video.description}</p>}</div>
+      <div>
+        {video.releaseDate && <p className="eyebrow">{new Date(video.releaseDate).getUTCFullYear()}</p>}
+        <h2>{video.title}</h2>
+        {video.description && <p>{video.description}</p>}
+      </div>
     </article>
   );
 }
