@@ -16,6 +16,13 @@
       "type": "media",
       "multiple": false,
       "allowedTypes": ["images"]
+    },
+    "ctaLabel": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "ctaUrl": {
+      "type": "string"
     }
   }
 }

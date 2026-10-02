@@ -25,6 +25,11 @@
       "multiple": false,
       "allowedTypes": ["images"]
     },
+    "slides": {
+      "type": "component",
+      "repeatable": true,
+      "component": "home.slide"
+    },
     "heading": {
       "type": "string"
     },

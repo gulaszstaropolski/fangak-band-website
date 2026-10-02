@@ -1,15 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getSettings } from "@/lib/content";
-
-const navigation = [
-  ["About", "/about"],
-  ["Music", "/music"],
-  ["Videos", "/videos"],
-  ["Gallery", "/gallery"],
-  ["Tour", "/events"],
-  ["Contact", "/contact"],
-] as const;
+import { getNavigation, getSettings } from "@/lib/content";
 
 export async function SiteHeader({
   name,
@@ -22,7 +13,7 @@ export async function SiteHeader({
   logoImage?: string;
   preferProvidedLogo?: boolean;
 }) {
-  const settings = await getSettings();
+  const [settings, navigation] = await Promise.all([getSettings(), getNavigation()]);
   const resolvedName = settings.siteName || name;
   const resolvedLogoImage = preferProvidedLogo ? logoImage || settings.logo : settings.logo || logoImage;
   const resolvedLogoText = preferProvidedLogo
@@ -36,14 +27,11 @@ export async function SiteHeader({
         <span className="wordmark-dot">.</span>
       </Link>
       <nav className="main-nav" aria-label="Main navigation">
-        {navigation.map(([label, href]) => (
-          <Link key={href} href={href}>
+        {navigation.map(({ label, href }) => (
+          <Link key={href} href={href} className={href === "/shop" ? "nav-shop" : undefined}>
             {label}
           </Link>
         ))}
-        <Link className="nav-shop" href="/shop">
-          Shop ↗
-        </Link>
       </nav>
     </header>
   );
