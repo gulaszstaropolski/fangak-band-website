@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { CMSLink, CMSSections } from "@/components/cms-page";
@@ -32,6 +31,7 @@ export default async function Home() {
   const subtitle = home?.subheading || settings.subtitle || band.tagline || "Independent music, made to move you.";
   const description = home?.description || settings.description || band.bio;
   const siteName = settings.siteName || band.name || "FANGAK";
+  const heroImage = home?.backgroundImage || band.heroImage;
 
   return (
     <>
@@ -55,7 +55,14 @@ export default async function Home() {
             }).replace(/</g, "\\u003c"),
           }}
         />
-        <section className="hero">
+        <section
+          className="hero"
+          style={heroImage ? {
+            backgroundImage: `url(${JSON.stringify(heroImage)})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          } : undefined}
+        >
           <div className="hero-texture" aria-hidden="true" />
           <div className="hero-content">
             {!home && <p className="eyebrow">Independent band · Est. in sound</p>}
@@ -75,9 +82,6 @@ export default async function Home() {
             </div>
           </div>
           {!home && <div className="hero-sticker" aria-hidden="true"><span>TURN IT</span><strong>UP!</strong></div>}
-          {(home?.backgroundImage || band.heroImage) && (
-            <Image src={home?.backgroundImage || band.heroImage!} alt="" fill priority className="hero-photo" sizes="100vw" />
-          )}
           {!home && <span className="hero-index">01 / SOUND IN MOTION</span>}
         </section>
 

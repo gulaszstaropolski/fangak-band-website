@@ -181,7 +181,7 @@ const cmsUrl = (
   process.env.STRAPI_URL ??
   (process.env.NODE_ENV === "production" ? undefined : "http://localhost:1337")
 )?.replace(/\/$/, "");
-const REVALIDATE_SECONDS = process.env.NODE_ENV === "production" ? 60 : 0;
+const REVALIDATE_SECONDS = 0;
 
 function logCmsError(url: string, reason: unknown) {
   if (process.env.NODE_ENV !== "production") {
